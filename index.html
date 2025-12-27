@@ -6,12 +6,10 @@
   <title>Shyamal Dowarah | Developer & Creator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-  <!-- Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
@@ -266,7 +264,6 @@
 
     <div class="projects-grid">
 
-      <!-- Card 1 -->
       <div class="card-wrap" data-link="https://github.com/shyamaldowarah/QuickWindowsTimeChanger2">
         <div class="project-card">
           <div class="card-shine"></div>
@@ -281,7 +278,6 @@
         </div>
       </div>
 
-      <!-- Card 2 -->
       <div class="card-wrap" data-link="https://github.com/shyamaldowarah/LinkManager">
         <div class="project-card">
           <div class="card-shine"></div>
@@ -296,7 +292,6 @@
         </div>
       </div>
 
-      <!-- Card 3 -->
       <div class="card-wrap">
         <div class="project-card" style="opacity: 0.8; border-style: dashed;">
           <div class="card-shine"></div>
@@ -417,11 +412,45 @@
     animateParticles();
 
 
-    // --- 3D TILT & FLUID SHINE EFFECT ---
+    // --- 3D TILT & FLUID SHINE EFFECT (GYRO ENABLED) ---
     const cards = document.querySelectorAll('.card-wrap');
-
-    // Lerp function for smooth interpolation
     const lerp = (start, end, factor) => start + (end - start) * factor;
+
+    // --- Gyroscope Global State ---
+    let gyro = { active: false, x: 0, y: 0 };
+
+    // Handler for Device Orientation
+    const handleOrientation = (e) => {
+      // If no valid data, ignore (PC mostly)
+      if (e.beta === null || e.gamma === null) return;
+
+      gyro.active = true;
+
+      // Clamp values to limit tilt range (e.g., -20 to 20 deg)
+      // Gamma: Left/Right (-90 to 90)
+      // Beta: Front/Back (-180 to 180)
+      const maxTilt = 20;
+      gyro.x = Math.min(Math.max(e.gamma, -maxTilt), maxTilt);
+      gyro.y = Math.min(Math.max(e.beta, -maxTilt), maxTilt);
+    };
+
+    window.addEventListener('deviceorientation', handleOrientation);
+
+    // iOS Permission Handler (Requires user interaction)
+    document.body.addEventListener('click', async () => {
+      if (typeof DeviceOrientationEvent !== 'undefined' && 
+          typeof DeviceOrientationEvent.requestPermission === 'function') {
+        try {
+          const permissionState = await DeviceOrientationEvent.requestPermission();
+          if (permissionState === 'granted') {
+            window.addEventListener('deviceorientation', handleOrientation);
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    }, { once: true });
+
 
     cards.forEach(card => {
       const cardInner = card.querySelector('.project-card');
@@ -429,65 +458,82 @@
 
       // Physics state
       let bounds;
-      let mouseX = 0, mouseY = 0;   // Mouse position relative to card
-      let shineX = 50, shineY = 50; // Current shine position (%)
-      let targetX = 50, targetY = 50; // Target position (%)
+      let mouseX = 0, mouseY = 0;
+      let targetX = 50, targetY = 50; 
       let rotationX = 0, rotationY = 0;
       let targetRotX = 0, targetRotY = 0;
       let isHovering = false;
 
-      // Update bounds on scroll/resize
       const updateBounds = () => { bounds = card.getBoundingClientRect(); };
       window.addEventListener('resize', updateBounds);
       window.addEventListener('scroll', updateBounds);
+      updateBounds(); // Init immediately
 
+      // --- Desktop / Mouse Events ---
       card.addEventListener('mouseenter', () => {
-        isHovering = true;
-        updateBounds();
-        shine.style.opacity = '1';
+        // Only engage mouse hover if Gyro isn't dominating
+        if (!gyro.active) {
+          isHovering = true;
+          shine.style.opacity = '1';
+        }
       });
 
       card.addEventListener('mouseleave', () => {
-        isHovering = false;
-        shine.style.opacity = '0';
-        // Reset target to center
-        targetRotX = 0;
-        targetRotY = 0;
+        if (!gyro.active) {
+          isHovering = false;
+          shine.style.opacity = '0';
+          targetRotX = 0;
+          targetRotY = 0;
+        }
       });
 
       card.addEventListener('mousemove', (e) => {
+        if (gyro.active) return; // Ignore mouse if gyro is working
         if (!bounds) updateBounds();
+        
         const x = e.clientX - bounds.left;
         const y = e.clientY - bounds.top;
-
-        // Calculate Percentages
         const xPct = x / bounds.width;
         const yPct = y / bounds.height;
 
-        // Update Targets
-        targetX = x; /* Pixel value for radial gradient position */
+        targetX = x; 
         targetY = y;
-
-        // Tilt targets (-20 to 20 deg)
         targetRotX = (yPct - 0.5) * 20 * -1;
         targetRotY = (xPct - 0.5) * 20;
       });
 
-      // Animation Loop for Fluid Physics
+      // --- Animation Loop ---
       const animateCard = () => {
-        if (isHovering || Math.abs(rotationX) > 0.1) {
+        // If Gyro is active, update targets based on phone tilt
+        if (gyro.active) {
+            // Apply gyro values to rotation targets
+            targetRotY = gyro.x;  // Gamma -> Rotate Y
+            targetRotX = -gyro.y; // Beta -> Rotate X (Inverted for natural feel)
 
-          // Smooth Tilt (Factor 0.1)
+            // Calculate "Shine" position based on tilt angle
+            // Map -20..20 deg to 0..Width pixels
+            if(bounds) {
+              const xPct = (gyro.x + 20) / 40; 
+              const yPct = (gyro.y + 20) / 40;
+              targetX = xPct * bounds.width;
+              targetY = yPct * bounds.height;
+            }
+            
+            shine.style.opacity = '1'; // Always shine on mobile
+        }
+
+        const shouldAnimate = isHovering || gyro.active || Math.abs(rotationX) > 0.1 || Math.abs(rotationY) > 0.1;
+
+        if (shouldAnimate) {
+          // Smooth Tilt
           rotationX = lerp(rotationX, targetRotX, 0.1);
           rotationY = lerp(rotationY, targetRotY, 0.1);
           cardInner.style.transform = `rotateX(${rotationX.toFixed(2)}deg) rotateY(${rotationY.toFixed(2)}deg)`;
 
-          // Smooth Shine (Factor 0.08 - slightly slower "liquid" feel)
-          // We need pixel values for the gradient position
+          // Smooth Shine
           const currentX = parseFloat(card.style.getPropertyValue('--shine-x') || 0);
           const currentY = parseFloat(card.style.getPropertyValue('--shine-y') || 0);
 
-          // Check if we need to initialize
           if (isNaN(currentX)) {
             card.style.setProperty('--shine-x', `${targetX}px`);
             card.style.setProperty('--shine-y', `${targetY}px`);
@@ -501,10 +547,9 @@
         requestAnimationFrame(animateCard);
       };
 
-      // Start loop for this card
       animateCard();
 
-      // Make clickable
+      // Click handling
       card.addEventListener('click', (e) => {
         if (e.target.tagName !== 'A' && e.target.parentElement.tagName !== 'A') {
           const link = card.querySelector('a');
@@ -516,5 +561,4 @@
   </script>
 
 </body>
-
 </html>
