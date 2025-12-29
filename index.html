@@ -1,31 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
-  <title>Shyamal Dowarah | Developer & Creator</title>
+  <title>Shyamal Dowarah | Developer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
     :root {
       --primary: #818cf8;
-      --bg-main: #0b0f19;
+      --bg-main: #0f172a;
+      --card-bg: #1e293b;
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Inter', sans-serif;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
     body {
       min-height: 100vh;
@@ -37,156 +31,123 @@
       overflow-x: hidden;
     }
 
-    /* Particle Canvas */
+    /* FIX: Added pointer-events: none so clicks pass through the canvas */
     #particle-canvas {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       z-index: -1;
-      pointer-events: none;
+      opacity: 0.6;
+      pointer-events: none; 
     }
 
     .container {
-      max-width: 1000px;
+      max-width: 1100px;
       width: 90%;
-      margin: 100px auto;
-      position: relative;
-      z-index: 1;
-      perspective: 1000px;
-      /* Essential for 3D */
+      margin: 80px auto;
+      /* FIX: Added relative positioning to force z-index to work */
+      position: relative; 
+      z-index: 10;
     }
 
     /* Hero Section */
     .hero {
       text-align: center;
-      margin-bottom: 100px;
-      animation: fadeIn 1.2s ease-out;
+      margin-bottom: 80px;
+      animation: fadeIn 1s ease-out;
     }
 
     .hero h1 {
-      font-size: 4.5rem;
+      font-size: 3.5rem;
       font-weight: 800;
-      margin-bottom: 15px;
-      letter-spacing: -0.05em;
-      background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #fff 0%, #818cf8 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
     }
 
     .hero h2 {
-      font-size: 1rem;
-      font-weight: 600;
+      font-size: 1.1rem;
       color: var(--primary);
-      margin-bottom: 25px;
       text-transform: uppercase;
-      letter-spacing: 0.3em;
+      letter-spacing: 3px;
+      margin-bottom: 30px;
     }
 
+    /* Social Links */
     .social-links {
       display: flex;
       justify-content: center;
+      flex-wrap: wrap;
       gap: 20px;
-      margin-top: 30px;
+      margin-top: 20px;
+      position: relative;
+      z-index: 20; /* Ensure buttons are top layer */
     }
 
     .social-btn {
       color: var(--text-muted);
       font-size: 1.5rem;
-      transition: 0.3s;
-      opacity: 0.7;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.05);
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.05);
+      text-decoration: none;
+      cursor: pointer;
     }
 
     .social-btn:hover {
       color: #fff;
-      opacity: 1;
-      transform: scale(1.1);
-      text-shadow: 0 0 15px white;
+      background: var(--primary);
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(129, 140, 248, 0.4);
     }
 
     /* Projects Grid */
     .projects-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-      gap: 40px;
-      padding: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      padding-bottom: 50px;
     }
 
-    /* 3D TILT CARD STYLES */
-    .card-wrap {
-      position: relative;
-      height: 100%;
-      perspective: 1000px;
-      transform-style: preserve-3d;
-      cursor: pointer;
-    }
-
-    .project-card {
-      background: rgba(255, 255, 255, 0.03);
+    .card {
+      background: var(--card-bg);
       border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 20px;
-      padding: 35px;
-      height: 100%;
-
-      /* 3D Settings */
-      transform-style: preserve-3d;
-      transform: translateZ(0);
-      /* Hardware accel */
-      transition: transform 0.1s;
-      /* Quick response for tilt script */
-
-      box-shadow:
-        0 5px 15px rgba(0, 0, 0, 0.2),
-        inset 0 0 0 rgba(255, 255, 255, 0);
-
+      border-radius: 16px;
+      padding: 30px;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: inherit;
       display: flex;
       flex-direction: column;
       position: relative;
       overflow: hidden;
+      z-index: 20; /* Ensure cards are clickable */
     }
 
-    /* Shine effect layer - Spot Light style */
-    .card-shine {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: radial-gradient(circle at var(--shine-x, 50%) var(--shine-y, 50%),
-          rgba(255, 255, 255, 0.15) 0%,
-          rgba(255, 255, 255, 0.05) 30%,
-          transparent 60%);
-      opacity: 0;
-      transition: opacity 0.3s;
-      pointer-events: none;
-      z-index: 10;
-      mix-blend-mode: overlay;
-    }
-
-    /* Card Content Parallax */
-    .card-content {
-      transform: translateZ(40px);
-      /* Pop out effect */
-      pointer-events: none;
-      z-index: 20;
+    .card:hover {
+      transform: translateY(-7px);
+      border-color: var(--primary);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     }
 
     .card-icon {
-      font-size: 2.5rem;
+      font-size: 2rem;
       color: var(--primary);
       margin-bottom: 20px;
-      text-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
-      transform: translateZ(50px);
     }
 
     .card-title {
-      font-size: 1.4rem;
+      font-size: 1.25rem;
       font-weight: 700;
       margin-bottom: 10px;
       color: #fff;
-      transform: translateZ(30px);
     }
 
     .card-desc {
@@ -194,50 +155,36 @@
       color: var(--text-muted);
       line-height: 1.6;
       margin-bottom: 20px;
-      transform: translateZ(20px);
     }
 
-    .card-link {
+    .card-footer {
       margin-top: auto;
-      color: #fff;
-      font-weight: 600;
       font-size: 0.9rem;
-      transform: translateZ(30px);
-      pointer-events: auto;
-      /* Enable clicking */
-      text-decoration: none;
-      display: inline-flex;
+      font-weight: 600;
+      color: var(--primary);
+      display: flex;
       align-items: center;
-      gap: 10px;
-      background: rgba(255, 255, 255, 0.1);
-      padding: 10px 20px;
-      border-radius: 30px;
-      transition: background 0.3s;
-    }
-
-    .card-link:hover {
-      background: var(--primary);
+      gap: 8px;
     }
 
     /* Footer */
     footer {
-      margin-top: 100px;
+      text-align: center;
       color: var(--text-muted);
-      font-size: 0.8rem;
-      opacity: 0.5;
-      padding-bottom: 40px;
+      font-size: 0.9rem;
+      padding: 40px 0;
+      opacity: 0.6;
     }
 
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    @media (max-width: 600px) {
+      .hero h1 { font-size: 2.5rem; }
+      .social-links { gap: 15px; }
+      .social-btn { width: 45px; height: 45px; font-size: 1.2rem; }
     }
   </style>
 </head>
@@ -250,13 +197,27 @@
 
     <header class="hero">
       <h1>Shyamal Dowarah</h1>
-      <h2>Digital Alchemist</h2>
+      <h2>Developer & Creator</h2>
 
       <div class="social-links">
-        <a href="https://github.com/shyamaldowarah" target="_blank" class="social-btn">
+        <a href="https://www.facebook.com/shyamaldowarah" target="_blank" class="social-btn" title="Facebook">
+          <i class="fab fa-facebook-f"></i>
+        </a>
+        <a href="https://www.instagram.com/shyamaldowarah" target="_blank" class="social-btn" title="Instagram">
+          <i class="fab fa-instagram"></i>
+        </a>
+        <a href="https://x.com/shyamaldowarah" target="_blank" class="social-btn" title="X (Twitter)">
+          <i class="fab fa-x-twitter"></i>
+        </a>
+        
+        <a href="https://www.youtube.com/@shyamaldowarah" target="_blank" class="social-btn" title="YouTube">
+          <i class="fab fa-youtube"></i>
+        </a>
+        
+        <a href="https://github.com/shyamaldowarah" target="_blank" class="social-btn" title="GitHub">
           <i class="fab fa-github"></i>
         </a>
-        <a href="mailto:shyamal013.business@gmail.com" class="social-btn">
+        <a href="mailto:shyamal013.business@gmail.com" class="social-btn" title="Email">
           <i class="fas fa-envelope"></i>
         </a>
       </div>
@@ -264,70 +225,57 @@
 
     <div class="projects-grid">
 
-      <div class="card-wrap" data-link="https://github.com/shyamaldowarah/QuickWindowsTimeChanger2">
-        <div class="project-card">
-          <div class="card-shine"></div>
-          <div class="card-icon"><i class="fas fa-clock"></i></div>
-          <div class="card-title">Quick Time Changer</div>
-          <div class="card-desc">
-            Instantly modify system time settings with a single click. Engineered for testing efficiency.
-          </div>
-          <a href="https://github.com/shyamaldowarah/QuickWindowsTimeChanger2" class="card-link" target="_blank">
-            Visit Project <i class="fas fa-arrow-right"></i>
-          </a>
+      <a href="https://github.com/shyamaldowarah/SDCopy" target="_blank" class="card">
+        <div class="card-icon"><i class="fas fa-copy"></i></div>
+        <div class="card-title">SDCopy</div>
+        <div class="card-desc">
+          An efficient file management and copying utility designed for speed and reliability.
         </div>
-      </div>
+        <div class="card-footer">View on GitHub <i class="fas fa-arrow-right"></i></div>
+      </a>
 
-      <div class="card-wrap" data-link="https://github.com/shyamaldowarah/LinkManager">
-        <div class="project-card">
-          <div class="card-shine"></div>
-          <div class="card-icon"><i class="fas fa-link"></i></div>
-          <div class="card-title">Link Manager</div>
-          <div class="card-desc">
-            A centralized command center for your digital resources. Organize, access, and deploy links rapidly.
-          </div>
-          <a href="https://github.com/shyamaldowarah/LinkManager" class="card-link" target="_blank">
-            Visit Project <i class="fas fa-arrow-right"></i>
-          </a>
+      <a href="https://github.com/shyamaldowarah/QuickWindowsTimeChanger2" target="_blank" class="card">
+        <div class="card-icon"><i class="fas fa-clock"></i></div>
+        <div class="card-title">Quick Time Changer 2</div>
+        <div class="card-desc">
+          The updated version of the system time modification tool. Instantly toggle system time for testing environments.
         </div>
-      </div>
+        <div class="card-footer">View on GitHub <i class="fas fa-arrow-right"></i></div>
+      </a>
 
-      <div class="card-wrap">
-        <div class="project-card" style="opacity: 0.8; border-style: dashed;">
-          <div class="card-shine"></div>
-          <div class="card-icon"><i class="fas fa-microchip"></i></div>
-          <div class="card-title">Lab Experiments</div>
-          <div class="card-desc">
-            Prototypes and experimental code currently incubating in the development lab.
-          </div>
+      <a href="https://github.com/shyamaldowarah/LinkManager" target="_blank" class="card">
+        <div class="card-icon"><i class="fas fa-link"></i></div>
+        <div class="card-title">Link Manager</div>
+        <div class="card-desc">
+          A centralized command center for your digital resources. Organize, access, and deploy your links rapidly.
         </div>
-      </div>
+        <div class="card-footer">View on GitHub <i class="fas fa-arrow-right"></i></div>
+      </a>
+
+      <a href="https://github.com/shyamaldowarah/Quick-Windows-Time-Chnager" target="_blank" class="card">
+        <div class="card-icon"><i class="fas fa-history"></i></div>
+        <div class="card-title">Quick Time Changer</div>
+        <div class="card-desc">
+          The original lightweight Windows utility for modifying system date and time settings quickly.
+        </div>
+        <div class="card-footer">View on GitHub <i class="fas fa-arrow-right"></i></div>
+      </a>
 
     </div>
 
     <footer>
       © 2025 Shyamal Dowarah
     </footer>
+
   </div>
 
   <script>
-    // --- PARTICLE SYSTEM ---
     const canvas = document.getElementById('particle-canvas');
     const ctx = canvas.getContext('2d');
+    
     let width, height;
     let particles = [];
-
-    // Configuration
-    const particleCount = 60;
-    const connectionDistance = 150;
-    const mouseDistance = 200;
-
-    // Mouse Tracking
-    let mouse = { x: null, y: null };
-    window.addEventListener('mousemove', (e) => {
-      mouse.x = e.x;
-      mouse.y = e.y;
-    });
+    const particleCount = 50;
 
     function resize() {
       width = canvas.width = window.innerWidth;
@@ -337,227 +285,59 @@
     resize();
 
     class Particle {
-      constructor() {
+      constructor() { this.reset(); }
+      reset() {
         this.x = Math.random() * width;
         this.y = Math.random() * height;
         this.vx = (Math.random() - 0.5) * 0.5;
         this.vy = (Math.random() - 0.5) * 0.5;
-        this.size = Math.random() * 2;
+        this.size = Math.random() * 2 + 1;
+        this.alpha = Math.random() * 0.5 + 0.1;
       }
       update() {
         this.x += this.vx;
         this.y += this.vy;
-
-        // Bounce off edges
         if (this.x < 0 || this.x > width) this.vx *= -1;
         if (this.y < 0 || this.y > height) this.vy *= -1;
-
-        // Mouse interaction
-        if (mouse.x != null) {
-          let dx = mouse.x - this.x;
-          let dy = mouse.y - this.y;
-          let distance = Math.sqrt(dx * dx + dy * dy);
-          if (distance < mouseDistance) {
-            const forceDirectionX = dx / distance;
-            const forceDirectionY = dy / distance;
-            const force = (mouseDistance - distance) / mouseDistance;
-            const directionX = forceDirectionX * force * 0.6;
-            const directionY = forceDirectionY * force * 0.6;
-            this.x -= directionX;
-            this.y -= directionY;
-          }
-        }
       }
       draw() {
-        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.fillStyle = `rgba(129, 140, 248, ${this.alpha})`;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill();
       }
     }
 
-    function initParticles() {
+    function init() {
       particles = [];
       for (let i = 0; i < particleCount; i++) {
         particles.push(new Particle());
       }
     }
-    initParticles();
+    init();
 
-    function animateParticles() {
+    function animate() {
       ctx.clearRect(0, 0, width, height);
-
-      for (let i = 0; i < particles.length; i++) {
-        particles[i].update();
-        particles[i].draw();
-
-        // Connect particles
-        for (let j = i; j < particles.length; j++) {
-          let dx = particles[i].x - particles[j].x;
-          let dy = particles[i].y - particles[j].y;
-          let distance = Math.sqrt(dx * dx + dy * dy);
-
-          if (distance < connectionDistance) {
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+        particles.forEach(p2 => {
+          let dx = p.x - p2.x;
+          let dy = p.y - p2.y;
+          let distance = Math.sqrt(dx*dx + dy*dy);
+          if (distance < 100) {
             ctx.beginPath();
-            ctx.strokeStyle = `rgba(255,255,255,${0.1 - distance / connectionDistance / 10})`;
-            ctx.lineWidth = 1;
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = `rgba(129, 140, 248, ${0.1 - distance/1000})`;
+            ctx.lineWidth = 0.5;
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p2.x, p2.y);
             ctx.stroke();
           }
-        }
-      }
-      requestAnimationFrame(animateParticles);
+        });
+      });
+      requestAnimationFrame(animate);
     }
-    animateParticles();
-
-
-    // --- 3D TILT & FLUID SHINE EFFECT (GYRO ENABLED) ---
-    const cards = document.querySelectorAll('.card-wrap');
-    const lerp = (start, end, factor) => start + (end - start) * factor;
-
-    // --- Gyroscope Global State ---
-    let gyro = { active: false, x: 0, y: 0 };
-
-    // Handler for Device Orientation
-    const handleOrientation = (e) => {
-      // If no valid data, ignore (PC mostly)
-      if (e.beta === null || e.gamma === null) return;
-
-      gyro.active = true;
-
-      // Clamp values to limit tilt range (e.g., -20 to 20 deg)
-      // Gamma: Left/Right (-90 to 90)
-      // Beta: Front/Back (-180 to 180)
-      const maxTilt = 20;
-      gyro.x = Math.min(Math.max(e.gamma, -maxTilt), maxTilt);
-      gyro.y = Math.min(Math.max(e.beta, -maxTilt), maxTilt);
-    };
-
-    window.addEventListener('deviceorientation', handleOrientation);
-
-    // iOS Permission Handler (Requires user interaction)
-    document.body.addEventListener('click', async () => {
-      if (typeof DeviceOrientationEvent !== 'undefined' && 
-          typeof DeviceOrientationEvent.requestPermission === 'function') {
-        try {
-          const permissionState = await DeviceOrientationEvent.requestPermission();
-          if (permissionState === 'granted') {
-            window.addEventListener('deviceorientation', handleOrientation);
-          }
-        } catch (error) {
-          console.error(error);
-        }
-      }
-    }, { once: true });
-
-
-    cards.forEach(card => {
-      const cardInner = card.querySelector('.project-card');
-      const shine = card.querySelector('.card-shine');
-
-      // Physics state
-      let bounds;
-      let mouseX = 0, mouseY = 0;
-      let targetX = 50, targetY = 50; 
-      let rotationX = 0, rotationY = 0;
-      let targetRotX = 0, targetRotY = 0;
-      let isHovering = false;
-
-      const updateBounds = () => { bounds = card.getBoundingClientRect(); };
-      window.addEventListener('resize', updateBounds);
-      window.addEventListener('scroll', updateBounds);
-      updateBounds(); // Init immediately
-
-      // --- Desktop / Mouse Events ---
-      card.addEventListener('mouseenter', () => {
-        // Only engage mouse hover if Gyro isn't dominating
-        if (!gyro.active) {
-          isHovering = true;
-          shine.style.opacity = '1';
-        }
-      });
-
-      card.addEventListener('mouseleave', () => {
-        if (!gyro.active) {
-          isHovering = false;
-          shine.style.opacity = '0';
-          targetRotX = 0;
-          targetRotY = 0;
-        }
-      });
-
-      card.addEventListener('mousemove', (e) => {
-        if (gyro.active) return; // Ignore mouse if gyro is working
-        if (!bounds) updateBounds();
-        
-        const x = e.clientX - bounds.left;
-        const y = e.clientY - bounds.top;
-        const xPct = x / bounds.width;
-        const yPct = y / bounds.height;
-
-        targetX = x; 
-        targetY = y;
-        targetRotX = (yPct - 0.5) * 20 * -1;
-        targetRotY = (xPct - 0.5) * 20;
-      });
-
-      // --- Animation Loop ---
-      const animateCard = () => {
-        // If Gyro is active, update targets based on phone tilt
-        if (gyro.active) {
-            // Apply gyro values to rotation targets
-            targetRotY = gyro.x;  // Gamma -> Rotate Y
-            targetRotX = -gyro.y; // Beta -> Rotate X (Inverted for natural feel)
-
-            // Calculate "Shine" position based on tilt angle
-            // Map -20..20 deg to 0..Width pixels
-            if(bounds) {
-              const xPct = (gyro.x + 20) / 40; 
-              const yPct = (gyro.y + 20) / 40;
-              targetX = xPct * bounds.width;
-              targetY = yPct * bounds.height;
-            }
-            
-            shine.style.opacity = '1'; // Always shine on mobile
-        }
-
-        const shouldAnimate = isHovering || gyro.active || Math.abs(rotationX) > 0.1 || Math.abs(rotationY) > 0.1;
-
-        if (shouldAnimate) {
-          // Smooth Tilt
-          rotationX = lerp(rotationX, targetRotX, 0.1);
-          rotationY = lerp(rotationY, targetRotY, 0.1);
-          cardInner.style.transform = `rotateX(${rotationX.toFixed(2)}deg) rotateY(${rotationY.toFixed(2)}deg)`;
-
-          // Smooth Shine
-          const currentX = parseFloat(card.style.getPropertyValue('--shine-x') || 0);
-          const currentY = parseFloat(card.style.getPropertyValue('--shine-y') || 0);
-
-          if (isNaN(currentX)) {
-            card.style.setProperty('--shine-x', `${targetX}px`);
-            card.style.setProperty('--shine-y', `${targetY}px`);
-          } else {
-            const newX = lerp(currentX, targetX, 0.08);
-            const newY = lerp(currentY, targetY, 0.08);
-            card.style.setProperty('--shine-x', `${newX.toFixed(1)}px`);
-            card.style.setProperty('--shine-y', `${newY.toFixed(1)}px`);
-          }
-        }
-        requestAnimationFrame(animateCard);
-      };
-
-      animateCard();
-
-      // Click handling
-      card.addEventListener('click', (e) => {
-        if (e.target.tagName !== 'A' && e.target.parentElement.tagName !== 'A') {
-          const link = card.querySelector('a');
-          if (link) link.click();
-        }
-      });
-    });
-
+    animate();
   </script>
 
 </body>
