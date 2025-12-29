@@ -109,7 +109,8 @@
     /* Projects Grid */
     .projects-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      /* FIX: Force exactly 2 columns for a balanced 2x2 layout */
+      grid-template-columns: repeat(2, 1fr);
       gap: 30px;
       padding-bottom: 50px;
     }
@@ -179,7 +180,12 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    @media (max-width: 600px) {
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+      .projects-grid {
+        grid-template-columns: 1fr; /* Stack cards in 1 column on mobile */
+      }
+      
       .hero h1 { font-size: 2.5rem; }
       .social-links { gap: 15px; }
       .social-btn { width: 45px; height: 45px; font-size: 1.2rem; }
